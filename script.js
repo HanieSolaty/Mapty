@@ -39,3 +39,52 @@ document.addEventListener('keydown', function (e) {
     closeModal();
   }
 });
+
+navigator.geolocation.getCurrentPosition(
+  function (pos) {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    //BUG: Remove these lines and replace them with lat & lon
+    const latWrong = 32.7052067;
+    const lonWrong = 51.6844932;
+
+    ////////Adding map based on current location
+    //coords array Replace with lat and lon instead on wrong ones
+    const coords = [latWrong, lonWrong];
+
+    //setView takes the coordinates of current center of map as arr and the num parameter is Zoom level
+    const map = L.map('map').setView(coords, 13);
+
+    //OpenStreetMap is a free map, but any other map like google map is also usable
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+      attribution: '© OpenStreetMap',
+    }).addTo(map);
+
+    const marker = L.marker(coords).addTo(map);
+
+    ////////adding a popup to the marker
+    marker.bindPopup('Hello world!<br/>I am a Popup.').openPopup();
+
+    //Adding event listener for click on map
+    function onMapClick(e) {
+      const { lat, lng } = e.latlng;
+      const coords = [lat, lng];
+      const markerLocation = L.marker(coords).addTo(map);
+      markerLocation
+        .bindPopup(`you are at ${coords}`, {
+          autoClose: false,
+          closeOnClick: false,
+          className: 'running-popup',
+        })
+        .openPopup();
+    }
+
+    map.on('click', onMapClick);
+
+    console.log(`https://www.google.com/maps/search/${latWrong},${lonWrong}/`);
+  },
+  function () {
+    openModal(`Something went wrong when we tried to load the map!`);
+  }
+);
