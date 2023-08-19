@@ -81,23 +81,37 @@ navigator.geolocation.getCurrentPosition(
   }
 );
 
+//Submiting form after filling it
 form.addEventListener('submit', function (e) {
   //prevent from reloading the page
   e.preventDefault();
 
   const { lat, lng } = mapEvent.latlng;
   const markerLocation = L.marker([lat, lng]).addTo(map);
+  const className =
+    inputType.value === 'cycling' ? 'cycling-popup' : 'running-popup';
   markerLocation
     .bindPopup(`Wrokout`, {
       autoClose: false,
       closeOnClick: false,
-      className: 'running-popup',
+      className: className,
     })
     .openPopup();
+  //hiding form
   form.classList.add('hidden');
+  //reseting form values
   inputCadence.value =
     inputDistance.value =
     inputDuration.value =
     inputElevation.value =
       '';
+  inputType.value = 'running';
+  inputElevation.closest('.form__row').classList.add('form__row--hidden');
+  inputCadence.closest('.form__row').classList.remove('form__row--hidden');
+});
+
+//changing workout type in form
+inputType.addEventListener('change', function () {
+  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
 });
