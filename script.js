@@ -40,6 +40,10 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
+//global vars
+let map, mapEvent;
+
+//Showing map on user current locaction
 navigator.geolocation.getCurrentPosition(
   function (pos) {
     const lat = pos.coords.latitude;
@@ -49,11 +53,8 @@ navigator.geolocation.getCurrentPosition(
     const lonWrong = 51.6844932;
 
     ////////Adding map based on current location
-    //coords array Replace with lat and lon instead on wrong ones
-    const coords = [latWrong, lonWrong];
-
     //setView takes the coordinates of current center of map as arr and the num parameter is Zoom level
-    const map = L.map('map').setView(coords, 13);
+    map = L.map('map').setView([latWrong, lonWrong], 13);
 
     //OpenStreetMap is a free map, but any other map like google map is also usable
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -61,30 +62,42 @@ navigator.geolocation.getCurrentPosition(
       attribution: '© OpenStreetMap',
     }).addTo(map);
 
-    const marker = L.marker(coords).addTo(map);
-
-    ////////adding a popup to the marker
-    marker.bindPopup('Hello world!<br/>I am a Popup.').openPopup();
-
     //Adding event listener for click on map
     function onMapClick(e) {
-      const { lat, lng } = e.latlng;
-      const coords = [lat, lng];
-      const markerLocation = L.marker(coords).addTo(map);
-      markerLocation
-        .bindPopup(`you are at ${coords}`, {
-          autoClose: false,
-          closeOnClick: false,
-          className: 'running-popup',
-        })
-        .openPopup();
+      //saving mapevent in order to use it for popups after submiting form
+      mapEvent = e;
+      form.classList.remove('hidden');
+      //change the focus from map to input of form
+      inputDistance.focus();
     }
 
     map.on('click', onMapClick);
 
+    //TODO: remove this line
     console.log(`https://www.google.com/maps/search/${latWrong},${lonWrong}/`);
   },
   function () {
-    openModal(`Something went wrong when we tried to load the map!`);
+    openModal(`Something went wrong with loading the map!`);
   }
 );
+
+form.addEventListener('submit', function (e) {
+  //prevent from reloading the page
+  e.preventDefault();
+
+  const { lat, lng } = mapEvent.latlng;
+  const markerLocation = L.marker([lat, lng]).addTo(map);
+  markerLocation
+    .bindPopup(`Wrokout`, {
+      autoClose: false,
+      closeOnClick: false,
+      className: 'running-popup',
+    })
+    .openPopup();
+  form.classList.add('hidden');
+  inputCadence.value =
+    inputDistance.value =
+    inputDuration.value =
+    inputElevation.value =
+      '';
+});
